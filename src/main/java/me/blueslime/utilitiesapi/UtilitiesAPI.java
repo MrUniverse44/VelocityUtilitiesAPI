@@ -4,14 +4,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class UtilitiesAPI extends JavaPlugin {
 
-    @Override
-    public void onEnable() {
-        // Plugin startup logic
+    private UtilitiesAPI() {
 
     }
 
-    @Override
-    public void onDisable() {
-        // Plugin shutdown logic
+    public UtilitiesAPI build() {
+        return new UtilitiesAPI();
     }
 }
