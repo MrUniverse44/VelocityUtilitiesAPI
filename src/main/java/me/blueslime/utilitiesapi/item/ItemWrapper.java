@@ -34,7 +34,9 @@ public class ItemWrapper implements Cloneable {
 
     private ItemWrapper(String material, int amount, String name, List<String> lore, List<String> enchantments, String... nbts) {
         item = parseItemStack(material);
-        setName(name);
+        if (name != null) {
+            setName(name);
+        }
         setLore(lore);
         setAmount(amount);
         setEnchantments(enchantments);
