@@ -6,7 +6,7 @@
 
 ---
 
-* Support from 1.8.x to 1.19.x
+* Support from 1.8.x to 1.20.x
 * ItemBuilder with NBTs
 
 ---
@@ -26,7 +26,7 @@ Dependency:
             <artifactId>UtilitiesAPI</artifactId>
             <version>TAG</version>
             <!-- TAG = latest version, for example:
-            <version>0.1</version>
+            <version>0.2</version>
             -->
         </dependency>
 ```

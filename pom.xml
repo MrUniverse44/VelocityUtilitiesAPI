@@ -6,7 +6,7 @@
 
     <groupId>me.blueslime</groupId>
     <artifactId>UtilitiesAPI</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
     <packaging>jar</packaging>
 
     <name>UtilitiesAPI</name>
@@ -73,6 +73,10 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io/</url>
         </repository>
+        <repository>
+            <id>mojang</id>
+            <url>https://libraries.minecraft.net/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -82,11 +86,18 @@
             <version>1.16.5-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>com.github.BlueSlimeDev</groupId>
             <artifactId>NMSHandlerAPI</artifactId>
             <version>0.3</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.mojang</groupId>
+            <artifactId>authlib</artifactId>
+            <version>1.5.21</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

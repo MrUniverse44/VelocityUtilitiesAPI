@@ -1,5 +1,7 @@
 package me.blueslime.utilitiesapi.item;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import me.blueslime.utilitiesapi.exceptions.EnchantmentException;
 import me.blueslime.utilitiesapi.item.dynamic.DynamicItem;
 import me.blueslime.utilitiesapi.item.dynamic.executor.DefaultExecutor;
@@ -16,7 +18,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -143,7 +147,7 @@ public class ItemWrapper implements Cloneable {
     }
 
     /**
-     * Creates a clone of the ItemWrapper, in this clon you can edit
+     * Creates a clone of the ItemWrapper, in this clone you can edit
      * a custom name, lore or item properties, this includes support for
      * {@link org.bukkit.entity.Player} to include Placeholders or conditions
      *
@@ -170,6 +174,10 @@ public class ItemWrapper implements Cloneable {
     }
 
     private ItemStack parseItemStack(String value) {
+        if (value.contains("texture:") || value.contains("skin:") || value.contains("textures:") ||
+                value.contains("texture;") || value.contains("skin;") || value.contains("textures;")) {
+            return applyTexture(value);
+        }
         if (value.contains(":")) {
             String[] split = value.split(":", 2);
             String material = split[0];
@@ -192,6 +200,77 @@ public class ItemWrapper implements Cloneable {
         return new ItemStack(
                 parseMaterial(value)
         );
+    }
+
+    private ItemStack applyTexture(String value) {
+        Material material = parseMaterial("PLAYER_HEAD");
+
+        if (material == Material.POTION) {
+            material = parseMaterial("SKULL");
+        }
+
+        if (material == Material.POTION) {
+            material = parseMaterial("SKULL_ITEM");
+        }
+
+        if (material != Material.POTION) {
+            return applyTexture(
+                    new ItemStack(material),
+                    value
+            );
+        }
+        return new ItemStack(material);
+    }
+
+    private ItemStack applyTexture(ItemStack itemStack, String value) {
+
+        SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
+
+        if (value != null) {
+            value = value.replace(
+                    "textures: ", ""
+            ).replace(
+                    "texture: ", ""
+            ).replace(
+                    "textures:", ""
+            ).replace(
+                    "texture:", ""
+            ).replace(
+                    "skin: ", ""
+            ).replace(
+                    "skin:", ""
+            ).replace(
+                    "textures; ", ""
+            ).replace(
+                    "texture; ", ""
+            ).replace(
+                    "textures;", ""
+            ).replace(
+                    "texture;", ""
+            ).replace(
+                    "skin; ", ""
+            ).replace(
+                    "skin;", ""
+            );
+        }
+
+        if (meta != null && (value != null && !value.isEmpty())) {
+            GameProfile profile = new GameProfile(UUID.randomUUID(), "");
+
+            profile.getProperties().put("textures", new Property("textures", value));
+
+            Field profileField;
+
+            try {
+                profileField = meta.getClass().getDeclaredField("profile");
+                profileField.setAccessible(true);
+                profileField.set(meta, profile);
+            } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ignored) {}
+
+            itemStack.setItemMeta(meta);
+        }
+
+        return itemStack;
     }
 
     private Material parseMaterial(String material) {
@@ -239,7 +318,7 @@ public class ItemWrapper implements Cloneable {
 
     /**
      * Get the lore of the item
-     * @return lore, if the lore is not added or the item is not set, it will return a Empty List
+     * @return lore, if the lore is not added or the item is not set, it will return an Empty List
      */
     public List<String> getLore() {
         if (item != null && item.getItemMeta() != null && item.getItemMeta().hasLore()) {
