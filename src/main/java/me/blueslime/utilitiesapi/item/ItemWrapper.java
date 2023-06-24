@@ -206,20 +206,29 @@ public class ItemWrapper implements Cloneable {
 
     private ItemStack applyTexture(String value) {
         Material material = parseMaterial("PLAYER_HEAD");
+        boolean useByte = false;
+
+        if (material == Material.POTION) {
+            material = parseMaterial("SKULL_ITEM");
+            useByte = true;
+        }
 
         if (material == Material.POTION) {
             material = parseMaterial("SKULL");
         }
 
-        if (material == Material.POTION) {
-            material = parseMaterial("SKULL_ITEM");
-        }
-
         if (material != Material.POTION) {
-            return applyTexture(
-                    new ItemStack(material),
-                    value
-            );
+            if (!useByte) {
+                return applyTexture(
+                        new ItemStack(material),
+                        value
+                );
+            } else {
+                return applyTexture(
+                        new ItemStack(material, 1, (short) 3),
+                        value
+                );
+            }
         }
         return new ItemStack(material);
     }
