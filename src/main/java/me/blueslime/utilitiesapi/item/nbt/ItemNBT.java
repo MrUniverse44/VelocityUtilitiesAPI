@@ -65,6 +65,10 @@ public class ItemNBT {
                 this.setTag = item.getMethod("c", nbtCompound);
 
                 secondAttempt();
+            } else if (isSpecified("v1_20_R0") || isSpecified("v1_20_R1") || isSpecified("v1_20_R2") || isSpecified("v1_20_R3") || isSpecified("v1_20_R4") || isSpecified("v1_20_R5")) {
+                this.hasTag = item.getMethod("u");
+                this.getTag = item.getMethod("v");
+                this.setTag = item.getMethod("c", nbtCompound);
             } else {
                 this.hasTag = item.getMethod("hasTag");
                 this.getTag = item.getMethod("getTag");

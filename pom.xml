@@ -6,7 +6,7 @@
 
     <groupId>me.blueslime</groupId>
     <artifactId>UtilitiesAPI</artifactId>
-    <version>0.4</version>
+    <version>0.5</version>
     <packaging>jar</packaging>
 
     <name>UtilitiesAPI</name>
