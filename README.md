@@ -26,7 +26,7 @@ Dependency:
             <artifactId>UtilitiesAPI</artifactId>
             <version>TAG</version>
             <!-- TAG = latest version, for example:
-            <version>0.5</version>
+            <version>0.6</version>
             -->
         </dependency>
 ```
