@@ -5,7 +5,9 @@ import com.mojang.authlib.properties.Property;
 import me.blueslime.utilitiesapi.exceptions.EnchantmentException;
 import me.blueslime.utilitiesapi.item.dynamic.DynamicItem;
 import me.blueslime.utilitiesapi.item.dynamic.executor.DefaultExecutor;
+import me.blueslime.utilitiesapi.item.dynamic.executor.DynamicAction;
 import me.blueslime.utilitiesapi.item.dynamic.executor.DynamicExecutor;
+import me.blueslime.utilitiesapi.item.dynamic.executor.FunctionExecutor;
 import me.blueslime.utilitiesapi.item.nbt.ItemNBT;
 import me.blueslime.utilitiesapi.text.TextUtilities;
 import me.blueslime.utilitiesapi.tools.PluginTools;
@@ -22,6 +24,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -49,6 +52,16 @@ public class ItemWrapper implements Cloneable {
 
     public ItemWrapper setDynamic(DynamicExecutor executor) {
         this.executor = executor;
+        return this;
+    }
+
+    public ItemWrapper setDynamic(DynamicAction executor) {
+        this.executor = executor;
+        return this;
+    }
+
+    public ItemWrapper setDynamic(Function<DynamicItem, ItemWrapper> function) {
+        this.executor = new FunctionExecutor(function);
         return this;
     }
 
@@ -98,9 +111,12 @@ public class ItemWrapper implements Cloneable {
 
             String name = split[0].toLowerCase(Locale.ENGLISH);
 
-            int level = isNumber(split[1]) ?
-                    Integer.parseInt(split[1]) :
-                    1;
+            int level =
+                    split.length >= 2 ?
+                    isNumber(split[1]) ?
+                        Integer.parseInt(split[1]) :
+                        1
+                    : 1;
 
             Enchantment enchantment = Enchantment.getByName(name);
 
@@ -496,7 +512,23 @@ public class ItemWrapper implements Cloneable {
 
         return new ItemWrapper(
                 item.clone()
-        );
+        ).checkEnchantments(item);
+    }
+
+    /**
+     * Ensure to move enchantments from the main item to the final item
+     * @param itemStack to clone enchantments
+     * @return item with enchantments applied
+     */
+    public ItemWrapper checkEnchantments(ItemStack itemStack) {
+        try {
+            if (!itemStack.getEnchantments().isEmpty()) {
+                itemStack.getEnchantments().forEach(
+                        (enchantment, level) -> item.addUnsafeEnchantment(enchantment, level)
+                );
+            }
+        } catch (Exception ignored) { }
+        return this;
     }
 }
 
