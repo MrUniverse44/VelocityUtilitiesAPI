@@ -507,6 +507,21 @@ public class ItemWrapper implements Cloneable {
         return Bukkit.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI");
     }
 
+    private ItemWrapper verify() {
+        checkItem();
+
+        return this;
+    }
+
+    /**
+     * Creates a ItemWrapper from a ItemStack
+     * @param itemStack for the ItemWrapper instance
+     * @return created ItemWrapper instance
+     */
+    public static ItemWrapper fromItem(ItemStack itemStack) {
+        return new ItemWrapper(itemStack).verify();
+    }
+
     public ItemWrapper copy() {
         checkItem();
 
