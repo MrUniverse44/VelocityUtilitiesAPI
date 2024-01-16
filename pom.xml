@@ -6,7 +6,7 @@
 
     <groupId>me.blueslime</groupId>
     <artifactId>UtilitiesAPI</artifactId>
-    <version>0.7</version>
+    <version>0.8</version>
     <packaging>jar</packaging>
 
     <name>UtilitiesAPI</name>
@@ -100,7 +100,7 @@
         <dependency>
             <groupId>com.github.BlueSlimeDev</groupId>
             <artifactId>NMSHandlerAPI</artifactId>
-            <version>0.4</version>
+            <version>0.5.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
