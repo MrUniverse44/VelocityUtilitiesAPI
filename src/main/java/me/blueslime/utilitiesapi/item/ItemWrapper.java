@@ -106,6 +106,8 @@ public class ItemWrapper implements Cloneable {
 
         Logger logger = null;
 
+        Map<Enchantment, Integer> enchantmentMap = new HashMap<>();
+
         for (String line : enchantments) {
             String[] split = line.replace(" ", "").split(",", 2);
 
@@ -121,12 +123,16 @@ public class ItemWrapper implements Cloneable {
             Enchantment enchantment = Enchantment.getByName(name);
 
             if (enchantment != null) {
+
+                enchantmentMap.put(enchantment, level);
+
                 item.addUnsafeEnchantment(
                         enchantment,
                         level
                 );
                 continue;
             }
+
 
             if (!ENCHANTMENT_WARNING) {
                 ENCHANTMENT_WARNING = true;
@@ -140,6 +146,18 @@ public class ItemWrapper implements Cloneable {
                                 )
                 ).printStackTrace();
             }
+        }
+
+        ItemMeta meta = item.getItemMeta();
+
+        if (meta != null) {
+            for (Map.Entry<Enchantment, Integer> entry : enchantmentMap.entrySet()) {
+                try {
+                    meta.addEnchant(entry.getKey(), entry.getValue(), true);
+                } catch (Exception ignored) { }
+            }
+
+            item.setItemMeta(meta);
         }
     }
 
@@ -447,11 +465,11 @@ public class ItemWrapper implements Cloneable {
             return fromData("POTION");
         }
         ItemWrapper wrapper = fromData(
-                configuration.getString("material", "POTION"),
-                configuration.getInt("amount", 1),
-                configuration.getString("name", null),
-                configuration.getStringList("lore"),
-                configuration.getStringList("enchantments")
+            configuration.getString("material", "POTION"),
+            configuration.getInt("amount", 1),
+            configuration.getString("name", null),
+            configuration.getStringList("lore"),
+            configuration.getStringList("enchantments")
         );
         if (configuration.contains("charge-color")) {
             wrapper.setChargeMeta(
