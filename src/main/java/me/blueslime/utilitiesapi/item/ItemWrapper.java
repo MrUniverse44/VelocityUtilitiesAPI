@@ -111,7 +111,7 @@ public class ItemWrapper implements Cloneable {
         for (String line : enchantments) {
             String[] split = line.replace(" ", "").split(",", 2);
 
-            String name = split[0].toLowerCase(Locale.ENGLISH);
+            String name = split[0].toUpperCase(Locale.ENGLISH);
 
             int level =
                     split.length >= 2 ?
