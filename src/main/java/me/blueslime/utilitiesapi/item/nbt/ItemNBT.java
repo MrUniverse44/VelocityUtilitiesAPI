@@ -18,7 +18,7 @@ public class ItemNBT {
     public Method getTag;
     public Method setTag;
 
-
+    protected String originVersion;
     protected final String version;
 
     private static ItemNBT ITEM_NBT;
@@ -33,6 +33,11 @@ public class ItemNBT {
     private ItemNBT() {
         String name = Bukkit.getServer().getClass().getPackage().getName();
 
+        try {
+            this.originVersion = Bukkit.getServer().getBukkitVersion().split("-")[0];
+        } catch (Exception ignored) {
+            this.originVersion = "1.8.8";
+        }
         this.version = name.substring(
                 name.lastIndexOf(".") + 1
         );
@@ -69,6 +74,8 @@ public class ItemNBT {
                 this.hasTag = item.getMethod("u");
                 this.getTag = item.getMethod("v");
                 this.setTag = item.getMethod("c", nbtCompound);
+
+                secondAttempt();
             } else {
                 this.hasTag = item.getMethod("hasTag");
                 this.getTag = item.getMethod("getTag");
@@ -92,7 +99,9 @@ public class ItemNBT {
             try {
                 this.setString = nbtCompound.getMethod("putString", String.class, String.class);
                 this.getString = nbtCompound.getMethod("getString", String.class);
-            } catch (Exception ignored2) {}
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -145,6 +154,7 @@ public class ItemNBT {
         return getInstance().setString(stack, k, v);
     }
 
+    @SuppressWarnings("unused")
     public static String fromString(ItemStack stack, String k) {
         return getInstance().getString(stack, k);
     }
