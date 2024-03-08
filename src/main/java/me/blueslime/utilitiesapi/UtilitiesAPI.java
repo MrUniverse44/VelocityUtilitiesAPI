@@ -1,7 +1,12 @@
 package me.blueslime.utilitiesapi;
 
 
+import me.blueslime.utilitiesapi.utils.consumer.PluginConsumer;
+import me.blueslime.utilitiesapi.utils.consumer.delay.ConsumerDelay;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.concurrent.TimeUnit;
 
 public final class UtilitiesAPI {
 

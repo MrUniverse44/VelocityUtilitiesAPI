@@ -1,5 +1,11 @@
 package me.blueslime.utilitiesapi.utils.consumer;
 
+import me.blueslime.utilitiesapi.utils.consumer.annotated.DelayedAnnotation;
+import me.blueslime.utilitiesapi.utils.consumer.delay.ConsumerDelay;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+
 import java.util.function.Consumer;
 
 public interface PluginConsumer<T> {
@@ -32,6 +38,38 @@ public interface PluginConsumer<T> {
         } catch (Exception ex) {
             exception.accept(ex);
         }
+    }
+
+    @DelayedAnnotation
+    static BukkitTask processDelayed(PluginOutConsumer consumer, Consumer<Exception> exception, ConsumerDelay delay) {
+        return new BukkitRunnable() {
+            public void run() {
+                try {
+                    consumer.executeConsumer();
+                } catch (Exception ex) {
+                    exception.accept(ex);
+                }
+            }
+        }.runTaskLater(
+            delay.getPlugin(),
+            delay.getRealDelay()
+        );
+    }
+
+    @DelayedAnnotation
+    static BukkitTask processDelayedAsynchronously(PluginOutConsumer consumer, Consumer<Exception> exception, ConsumerDelay delay) {
+        return new BukkitRunnable() {
+            public void run() {
+                try {
+                    consumer.executeConsumer();
+                } catch (Exception ex) {
+                    exception.accept(ex);
+                }
+            }
+        }.runTaskLaterAsynchronously(
+                delay.getPlugin(),
+                delay.getRealDelay()
+        );
     }
 
     static <T> T ofUnchecked(final PluginConsumer<T> template) {
