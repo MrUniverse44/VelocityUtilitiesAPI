@@ -11,6 +11,7 @@ import me.blueslime.utilitiesapi.item.dynamic.executor.FunctionExecutor;
 import me.blueslime.utilitiesapi.item.nbt.ItemNBT;
 import me.blueslime.utilitiesapi.text.TextUtilities;
 import me.blueslime.utilitiesapi.tools.PluginTools;
+import me.blueslime.utilitiesapi.utils.skulls.SkullReflection;
 import org.bukkit.Bukkit;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
@@ -30,7 +31,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "deprecation"})
 public class ItemWrapper implements Cloneable {
-
+    private static boolean SKULL_NEW_SKIN_SYSTEM = true;
     private static boolean ENCHANTMENT_WARNING = false;
     private DynamicExecutor executor = new DefaultExecutor();
     private ItemStack item;
@@ -222,9 +223,9 @@ public class ItemWrapper implements Cloneable {
                 int damage = Integer.parseInt(split[1]);
 
                 return new ItemStack(
-                        parseMaterial(material),
-                        1,
-                        (short) damage
+                    parseMaterial(material),
+                    1,
+                    (short) damage
                 );
             }
             return new ItemStack(
@@ -300,6 +301,15 @@ public class ItemWrapper implements Cloneable {
         }
 
         if (meta != null && (value != null && !value.isEmpty())) {
+            if (SKULL_NEW_SKIN_SYSTEM) {
+                if (SkullReflection.attemptNewBase64(
+                    itemStack, value
+                )) {
+                    return itemStack;
+                } else {
+                    SKULL_NEW_SKIN_SYSTEM = false;
+                }
+            }
             GameProfile profile = new GameProfile(UUID.randomUUID(), "");
 
             profile.getProperties().put("textures", new Property("textures", value));
