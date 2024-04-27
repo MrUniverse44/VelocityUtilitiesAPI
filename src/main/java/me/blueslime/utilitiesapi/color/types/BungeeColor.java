@@ -20,45 +20,44 @@ public class BungeeColor extends ColorHandler {
     }
 
     public String execute(String message) {
-        message = matchMain(message);
-        Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
-        Matcher matcher = pattern.matcher(message);
-
-        while (matcher.find()) {
-            String code = message.substring(matcher.start(), matcher.end());
-            if (COLORIZE_METHOD != null) {
-                try {
-                    ChatColor color = (ChatColor) COLORIZE_METHOD.invoke(
-                            ChatColor.WHITE,
-                            code
-                    );
-
-                    message = message.replace(
-                            code,
-                            color + ""
-                    );
-
-                    matcher = pattern.matcher(
-                            message
-                    );
-                } catch (IllegalAccessException | InvocationTargetException e ) {
-                    return message.replace(
-                            code,
-                            ""
-                    );
-                }
-            }
-        }
-        return ChatColor.translateAlternateColorCodes('&', message);
-    }
-
-    public String matchMain(String message) {
         Pattern pattern = Pattern.compile("&#[a-fA-F0-9]{6}");
         Matcher matcher = pattern.matcher(message);
 
         while (matcher.find()) {
+            String codeR = message.substring(matcher.start(), matcher.end());
+            String code = codeR.replace("&", "");
+            if (COLORIZE_METHOD != null) {
+                try {
+                    ChatColor color = (ChatColor) COLORIZE_METHOD.invoke(
+                        ChatColor.WHITE,
+                        code
+                    );
+
+                    message = message.replace(
+                        "&" + code,
+                        color + ""
+                    );
+
+                    matcher = pattern.matcher(
+                        message
+                    );
+                } catch (IllegalAccessException | InvocationTargetException e ) {
+                    return message.replace(
+                        "&" + code,
+                        ""
+                    ).replace(
+                        code,
+                        ""
+                    );
+                }
+            }
+        }
+
+        pattern = Pattern.compile("#[a-fA-F0-9]{6}");
+        matcher = pattern.matcher(message);
+
+        while (matcher.find()) {
             String code = message.substring(matcher.start(), matcher.end());
-            code = code.replace("&", "");
             if (COLORIZE_METHOD != null) {
                 try {
                     ChatColor color = (ChatColor) COLORIZE_METHOD.invoke(
@@ -76,11 +75,8 @@ public class BungeeColor extends ColorHandler {
                     );
                 } catch (IllegalAccessException | InvocationTargetException e ) {
                     return message.replace(
-                        "&" + code,
-                        ""
-                    ).replace(
-                        code,
-                        ""
+                            code,
+                            ""
                     );
                 }
             }
