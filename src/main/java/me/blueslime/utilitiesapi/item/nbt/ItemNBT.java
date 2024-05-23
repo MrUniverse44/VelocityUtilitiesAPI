@@ -39,7 +39,7 @@ public class ItemNBT {
             this.originVersion = "1.8.8";
         }
         this.version = name.substring(
-                name.lastIndexOf(".") + 1
+            name.lastIndexOf(".") + 1
         );
 
         try {
@@ -70,7 +70,7 @@ public class ItemNBT {
                 this.setTag = item.getMethod("c", nbtCompound);
 
                 secondAttempt();
-            } else if (isSpecified("v1_20_R0") || isSpecified("v1_20_R1") || isSpecified("v1_20_R2") || isSpecified("v1_20_R3") || isSpecified("v1_20_R4") || isSpecified("v1_20_R5")) {
+            } else if (isSpecified("v1_20_R0") || isSpecified("v1_20_R1") || isSpecified("v1_20_R2") || isSpecified("v1_20_R3") || isSpecified("v1_20_R4") || isSpecified("v1_20_R5") || isSpecified("v1_20_R6")) {
                 this.hasTag = item.getMethod("u");
                 this.getTag = item.getMethod("v");
                 this.setTag = item.getMethod("c", nbtCompound);
