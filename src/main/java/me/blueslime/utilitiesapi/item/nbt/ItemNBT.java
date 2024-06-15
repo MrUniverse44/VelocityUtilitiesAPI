@@ -7,16 +7,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 
 public class ItemNBT {
-    public Method reflectionItem;
-    public Method bukkitItem;
+    public Method reflectionItem = null;
+    public Method bukkitItem = null;
 
-    public Method setString;
-    public Method getString;
+    public Method setString = null;
+    public Method getString = null;
 
-    public Class<?> item;
-    public Method hasTag;
-    public Method getTag;
-    public Method setTag;
+    public Class<?> item = null;
+    public Method hasTag = null;
+    public Method getTag = null;
+    public Method setTag = null;
 
     protected String originVersion;
     protected final String version;
@@ -99,13 +99,14 @@ public class ItemNBT {
             try {
                 this.setString = nbtCompound.getMethod("putString", String.class, String.class);
                 this.getString = nbtCompound.getMethod("getString", String.class);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            } catch (Exception ignored2) { }
         }
     }
 
     public ItemStack setString(ItemStack stack, String k, String v) {
+        if (!isVersionCompatible()) {
+            return PersistentDataNBT.setString(stack, k, v);
+        }
         try {
             Object item = reflectionItem.invoke(null, stack);
 
@@ -126,14 +127,15 @@ public class ItemNBT {
             setTag.invoke(item, tag);
 
             return (ItemStack) bukkitItem.invoke(null, item);
-        } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
-        }
+        } catch (ReflectiveOperationException ignored) {}
 
         return stack;
     }
 
     protected String getString(ItemStack stack, String k) {
+        if (!isVersionCompatible()) {
+            return PersistentDataNBT.getString(stack, k);
+        }
         try {
             Object item = reflectionItem.invoke(null, stack);
 
@@ -154,9 +156,25 @@ public class ItemNBT {
         return getInstance().setString(stack, k, v);
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private boolean isVersionCompatible() {
+        return reflectionItem != null &&
+            bukkitItem != null &&
+            setString != null &&
+            getString != null &&
+            item != null &&
+            hasTag != null &&
+            getTag != null &&
+            setTag != null;
+    }
+
     @SuppressWarnings("unused")
     public static String fromString(ItemStack stack, String k) {
-        return getInstance().getString(stack, k);
+        String val = getInstance().getString(stack, k);
+        if (val == null) {
+            return "";
+        }
+        return val;
     }
 
     private boolean isSpecified(String version) {
