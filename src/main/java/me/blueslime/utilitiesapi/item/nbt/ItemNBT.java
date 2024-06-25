@@ -3,6 +3,7 @@ package me.blueslime.utilitiesapi.item.nbt;
 import java.lang.reflect.Method;
 
 import me.blueslime.nmshandlerapi.utils.presets.Presets;
+import me.blueslime.utilitiesapi.utils.consumer.PluginConsumer;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 
@@ -31,16 +32,31 @@ public class ItemNBT {
     }
 
     private ItemNBT() {
-        String name = Bukkit.getServer().getClass().getPackage().getName();
 
-        try {
-            this.originVersion = Bukkit.getServer().getBukkitVersion().split("-")[0];
-        } catch (Exception ignored) {
-            this.originVersion = "1.8.8";
-        }
+        // Returns 1.8.8 for example
+        this.originVersion = PluginConsumer.ofUnchecked(
+                () -> Bukkit.getServer().getBukkitVersion().split("-")[0],
+                e -> {},
+                "1.21"
+        );
+
+        // Returns org.bukkit.craftbukkit.v(version)
+        String name = PluginConsumer.ofUnchecked(
+            () -> Bukkit.getServer().getClass().getPackage().getName(),
+            e -> {},
+            "org.bukkit.craftbukkit.v1_21_R1"
+        );
+
         this.version = name.substring(
             name.lastIndexOf(".") + 1
         );
+
+        // From 1.21 this version to new versions some things
+        // Are not supported for reflection, so to prevent issues in console, we prepared this.
+        if (isVersionIncompatible()) {
+            // Don't need to load this because now uses Persistent Data in the newest versions.
+            return;
+        }
 
         try {
             Class<?> nbtCompound = Presets.NBT_COMPOUND.getResult();
@@ -92,19 +108,33 @@ public class ItemNBT {
     public void secondAttempt() {
         Class<?> nbtCompound = Presets.NBT_COMPOUND.getResult();
 
-        try {
-            this.setString = nbtCompound.getMethod("a", String.class, String.class);
-            this.getString = nbtCompound.getMethod("l", String.class);
-        } catch (Exception ignored) {
-            try {
-                this.setString = nbtCompound.getMethod("putString", String.class, String.class);
-                this.getString = nbtCompound.getMethod("getString", String.class);
-            } catch (Exception ignored2) { }
+        if (nbtCompound == null) {
+            return;
         }
+
+        this.setString = PluginConsumer.ofUnchecked(
+            () -> nbtCompound.getMethod("a", String.class, String.class),
+            e -> {},
+            PluginConsumer.ofUnchecked(
+                () -> nbtCompound.getMethod("putString", String.class, String.class),
+                e -> {},
+                null
+            )
+        );
+
+        this.setString = PluginConsumer.ofUnchecked(
+            () -> nbtCompound.getMethod("l", String.class),
+            e -> {},
+            PluginConsumer.ofUnchecked(
+                () -> nbtCompound.getMethod("getString", String.class),
+                e -> {},
+                null
+            )
+        );
     }
 
     public ItemStack setString(ItemStack stack, String k, String v) {
-        if (!isVersionCompatible()) {
+        if (isVersionIncompatible()) {
             return PersistentDataNBT.setString(stack, k, v);
         }
         try {
@@ -133,7 +163,7 @@ public class ItemNBT {
     }
 
     protected String getString(ItemStack stack, String k) {
-        if (!isVersionCompatible()) {
+        if (isVersionIncompatible()) {
             return PersistentDataNBT.getString(stack, k);
         }
         try {
@@ -156,16 +186,8 @@ public class ItemNBT {
         return getInstance().setString(stack, k, v);
     }
 
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private boolean isVersionCompatible() {
-        return reflectionItem != null &&
-            bukkitItem != null &&
-            setString != null &&
-            getString != null &&
-            item != null &&
-            hasTag != null &&
-            getTag != null &&
-            setTag != null;
+    private boolean isVersionIncompatible() {
+        return isUpperOrEqualThan(1.21);
     }
 
     @SuppressWarnings("unused")
@@ -179,5 +201,33 @@ public class ItemNBT {
 
     private boolean isSpecified(String version) {
         return this.version.equals(version);
+    }
+
+    private boolean isUpperOrEqualThan(double version) {
+        return convertClassVersionToNumber(this.version) >= version ||
+               convertVersionToNumber(originVersion) >= version;
+    }
+
+    private double convertVersionToNumber(String version) {
+        try {
+            // Not need to replace v and _ but only to prevent future changes xD
+            String[] parts = version.replace("v", "").replace("_", "").split("\\.");
+            if (parts.length >= 2) {
+                return Double.parseDouble(parts[0] + "." + parts[1]);
+            } else {
+                return Double.parseDouble(1 + "." + parts[0]);
+            }
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private double convertClassVersionToNumber(String version) {
+        try {
+            String[] parts = version.replace("v", "").split("_");
+            return Double.parseDouble(parts[0] + "." + parts[1]);
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            return 0;
+        }
     }
 }
