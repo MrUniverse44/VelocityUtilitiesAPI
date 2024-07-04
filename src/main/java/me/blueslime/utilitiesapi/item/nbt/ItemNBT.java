@@ -187,7 +187,7 @@ public class ItemNBT {
     }
 
     private boolean isVersionIncompatible() {
-        return isUpperOrEqualThan(1.21);
+        return isUpperOrEqualThan(1.20);
     }
 
     @SuppressWarnings("unused")
