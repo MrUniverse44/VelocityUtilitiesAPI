@@ -1,4 +1,5 @@
 # UtilitiesAPI | Simple tools for your plugins
+## Used in [BukkitMeteor](https://github.com/MrUniverse44/BukkitMeteor)
 
 ---
 
@@ -26,7 +27,7 @@ Dependency:
             <artifactId>UtilitiesAPI</artifactId>
             <version>TAG</version>
             <!-- TAG = latest version, for example:
-            <version>1.0.4</version>
+            <version>1.0.6</version>
             -->
         </dependency>
 ```

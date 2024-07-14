@@ -145,7 +145,7 @@ public class SkullReflection {
                         return true;
                     },
                     e -> {},
-                    false
+                    () -> false
             );
         }
         return false;

@@ -1,11 +1,5 @@
 package me.blueslime.utilitiesapi.utils.consumer;
 
-import me.blueslime.utilitiesapi.utils.consumer.annotated.DelayedAnnotation;
-import me.blueslime.utilitiesapi.utils.consumer.delay.ConsumerDelay;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
-
 import java.util.function.Consumer;
 
 public interface PluginConsumer<T> {
@@ -14,6 +8,10 @@ public interface PluginConsumer<T> {
 
     interface PluginOutConsumer {
         void executeConsumer() throws Exception;
+    }
+
+    interface PluginExecutableConsumer<T> {
+        T accept();
     }
 
     static  void process(PluginOutConsumer consumer) {
@@ -40,38 +38,6 @@ public interface PluginConsumer<T> {
         }
     }
 
-    @DelayedAnnotation
-    static BukkitTask processDelayed(PluginOutConsumer consumer, Consumer<Exception> exception, ConsumerDelay delay) {
-        return new BukkitRunnable() {
-            public void run() {
-                try {
-                    consumer.executeConsumer();
-                } catch (Exception ex) {
-                    exception.accept(ex);
-                }
-            }
-        }.runTaskLater(
-            delay.getPlugin(),
-            delay.getRealDelay()
-        );
-    }
-
-    @DelayedAnnotation
-    static BukkitTask processDelayedAsynchronously(PluginOutConsumer consumer, Consumer<Exception> exception, ConsumerDelay delay) {
-        return new BukkitRunnable() {
-            public void run() {
-                try {
-                    consumer.executeConsumer();
-                } catch (Exception ex) {
-                    exception.accept(ex);
-                }
-            }
-        }.runTaskLaterAsynchronously(
-                delay.getPlugin(),
-                delay.getRealDelay()
-        );
-    }
-
     static <T> T ofUnchecked(final PluginConsumer<T> template) {
         T results = null;
         try {
@@ -82,8 +48,8 @@ public interface PluginConsumer<T> {
         return results;
     }
 
-    static <T> T ofUnchecked(final PluginConsumer<T> template, final Consumer<Exception> exception, T defValue) {
-        T results = defValue;
+    static <T> T ofUnchecked(final PluginConsumer<T> template, final Consumer<Exception> exception, PluginExecutableConsumer<T> defValue) {
+        T results = defValue.accept();
         try {
             results = template.executeConsumer();
         } catch (Exception ex) {
@@ -102,8 +68,8 @@ public interface PluginConsumer<T> {
         return results;
     }
 
-    static <T> T ofUnchecked(final PluginConsumer<T> template, T defValue) {
-        T results = defValue;
+    static <T> T ofUnchecked(final PluginConsumer<T> template, PluginExecutableConsumer<T> defValue) {
+        T results = defValue.accept();
         try {
             results = template.executeConsumer();
         } catch (Exception ex) {

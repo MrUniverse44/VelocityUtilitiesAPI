@@ -360,4 +360,8 @@ public class Sender {
     public static List<String> colorizeList(List<String> list) {
         return TextUtilities.colorizeList(list);
     }
+
+    public CommandSender toCommandSender() {
+        return sender;
+    }
 }

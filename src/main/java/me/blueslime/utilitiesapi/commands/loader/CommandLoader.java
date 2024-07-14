@@ -1,11 +1,16 @@
 package me.blueslime.utilitiesapi.commands.loader;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Locale;
+import java.util.Map;
 
 import me.blueslime.utilitiesapi.commands.AdvancedCommand;
+import me.blueslime.utilitiesapi.utils.consumer.PluginConsumer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
-import org.bukkit.command.defaults.BukkitCommand;
+import org.bukkit.command.PluginIdentifiableCommand;
+import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class CommandLoader {
@@ -19,42 +24,84 @@ public class CommandLoader {
         return LOADER_INSTANCE;
     }
 
-    private CommandMap commandMap;
+    private final Map<String, Command> bukkitCommands;
+    private final CommandMap commandMap;
 
+    @SuppressWarnings("unchecked")
     private CommandLoader(JavaPlugin plugin) {
-        Field bukkitCommandMap;
+        Field bukkitCommandMapField = PluginConsumer.ofUnchecked(
+            () -> plugin.getServer().getClass().getDeclaredField("commandMap"),
+            e -> {},
+            () -> null
+        );
 
-        try {
-            bukkitCommandMap = plugin.getServer()
-                    .getClass()
-                    .getDeclaredField("commandMap");
-        } catch (Exception ignored) {
-            plugin.getLogger().info("Can't register plugin commands.");
-            return;
+        CommandMap commandMap = null;
+
+        if (bukkitCommandMapField != null) {
+            bukkitCommandMapField.setAccessible(true);
+
+            commandMap = PluginConsumer.ofUnchecked(
+                () -> (CommandMap)bukkitCommandMapField.get(plugin.getServer()),
+                e -> {},
+                () -> null
+            );
         }
 
-        bukkitCommandMap.setAccessible(true);
+        if (commandMap == null) {
+            // In this case CommandMap Field was not found, so we need to try with the method instead.
+            commandMap = PluginConsumer.ofUnchecked(
+                () -> {
+                    Method getCommandMap = plugin.getServer().getClass().getDeclaredMethod("getCommandMap");
+                    getCommandMap.setAccessible(true);
+                    return (CommandMap)getCommandMap.invoke(plugin.getServer());
+                },
+                e -> {},
+                () -> null
+            );
+        }
 
-        CommandMap commandMap;
+        this.commandMap = commandMap;
+        this.bukkitCommands = PluginConsumer.ofUnchecked(
+            () -> {
+                Field bukkitCommands = SimpleCommandMap.class.getDeclaredField("knownCommands");
+                bukkitCommands.setAccessible(true);
+                return (Map<String, Command>) bukkitCommands.get(this.commandMap);
+            },
+            e -> {},
+            () -> null
+        );
+    }
 
-        try {
-            commandMap = (CommandMap) bukkitCommandMap.get(plugin.getServer());
-            this.commandMap = commandMap;
-        } catch (Exception ignored) {
-            plugin.getLogger().info("Can't register plugin commands.");
+    private void registerCommand(final String name, AdvancedCommand<?> executable) {
+        final org.bukkit.command.Command oldCommand = commandMap.getCommand(name);
+
+        if (
+            oldCommand instanceof PluginIdentifiableCommand &&
+            ((PluginIdentifiableCommand) oldCommand).getPlugin() == executable.getPlugin()
+        ) {
+            bukkitCommands.remove(name);
+            oldCommand.unregister(commandMap);
+        }
+
+        String fallbackName = executable.getPlugin().getName().toLowerCase(Locale.ENGLISH);
+
+        commandMap.register(executable.getCommand(), fallbackName, executable);
+
+        for (String alias : executable.getAliases()) {
+            commandMap.register(alias, fallbackName, executable);
         }
     }
 
     public CommandLoader register(AdvancedCommand<?> command) {
         return register(
-                command.getCommand(),
-                command
+            command.getCommand(),
+            command
         );
     }
 
-    public CommandLoader register(String commandName, BukkitCommand commandClass) {
+    public CommandLoader register(String commandName, AdvancedCommand<?> commandClass) {
         if (commandMap != null) {
-            commandMap.register(commandName, commandClass);
+            registerCommand(commandName, commandClass);
         }
         return this;
     }
@@ -75,7 +122,7 @@ public class CommandLoader {
         }
 
         command.unregister(
-                commandMap
+            commandMap
         );
         return this;
     }

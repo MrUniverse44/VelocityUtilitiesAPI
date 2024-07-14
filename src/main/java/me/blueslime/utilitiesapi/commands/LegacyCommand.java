@@ -6,16 +6,16 @@ import org.bukkit.command.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 @SuppressWarnings({"unused", "NullableProblems"})
-public abstract class SimpleCommand<T extends JavaPlugin> implements CommandExecutor {
-    private final T plugin;
+public abstract class LegacyCommand<T extends JavaPlugin> implements CommandExecutor {
+    protected final T plugin;
     private String command;
 
-    public SimpleCommand(T plugin, String command) {
+    public LegacyCommand(T plugin, String command) {
         this.command = command;
         this.plugin = plugin;
     }
 
-    public SimpleCommand(T plugin) {
+    public LegacyCommand(T plugin) {
         this(plugin,null);
     }
 
@@ -29,7 +29,7 @@ public abstract class SimpleCommand<T extends JavaPlugin> implements CommandExec
         }
     }
 
-    public SimpleCommand<T> setCommand(String command) {
+    public LegacyCommand<T> setCommand(String command) {
         this.command = command;
         return this;
     }

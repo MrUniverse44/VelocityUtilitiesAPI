@@ -37,14 +37,14 @@ public class ItemNBT {
         this.originVersion = PluginConsumer.ofUnchecked(
                 () -> Bukkit.getServer().getBukkitVersion().split("-")[0],
                 e -> {},
-                "1.21"
+                () -> "1.21"
         );
 
         // Returns org.bukkit.craftbukkit.v(version)
         String name = PluginConsumer.ofUnchecked(
             () -> Bukkit.getServer().getClass().getPackage().getName(),
             e -> {},
-            "org.bukkit.craftbukkit.v1_21_R1"
+            () -> "org.bukkit.craftbukkit.v1_21_R1"
         );
 
         this.version = name.substring(
@@ -115,20 +115,20 @@ public class ItemNBT {
         this.setString = PluginConsumer.ofUnchecked(
             () -> nbtCompound.getMethod("a", String.class, String.class),
             e -> {},
-            PluginConsumer.ofUnchecked(
+            () -> PluginConsumer.ofUnchecked(
                 () -> nbtCompound.getMethod("putString", String.class, String.class),
                 e -> {},
-                null
+                () -> null
             )
         );
 
         this.setString = PluginConsumer.ofUnchecked(
             () -> nbtCompound.getMethod("l", String.class),
             e -> {},
-            PluginConsumer.ofUnchecked(
+            () -> PluginConsumer.ofUnchecked(
                 () -> nbtCompound.getMethod("getString", String.class),
                 e -> {},
-                null
+                () -> null
             )
         );
     }
