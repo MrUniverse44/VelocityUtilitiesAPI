@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@SuppressWarnings({"unused", "NullableProblems"})
+@SuppressWarnings({"unused"})
 public abstract class AdvancedCommand<T extends JavaPlugin> extends BukkitCommand {
     protected final T plugin;
     private String command;
@@ -68,17 +68,17 @@ public abstract class AdvancedCommand<T extends JavaPlugin> extends BukkitComman
         return this;
     }
 
-    public AdvancedCommand<T> setAliases(List<String> aliases) {
+    public @NotNull AdvancedCommand<T> setAliases(@NotNull List<String> aliases) {
         super.setAliases(aliases);
         return this;
     }
 
-    public AdvancedCommand<T> setDescription(String description) {
+    public @NotNull AdvancedCommand<T> setDescription(@NotNull String description) {
         super.setDescription(description);
         return this;
     }
 
-    public AdvancedCommand<T> setUsage(String message) {
+    public @NotNull AdvancedCommand<T> setUsage(@NotNull String message) {
         super.setUsage(message);
         return this;
     }
@@ -99,7 +99,7 @@ public abstract class AdvancedCommand<T extends JavaPlugin> extends BukkitComman
      * @return value
      */
     @Override
-    public boolean execute(CommandSender sender, String label, String[] arguments) {
+    public boolean execute(@NotNull CommandSender sender, @NotNull String label, String[] arguments) {
         executeCommand(Sender.build(sender), this.command, arguments);
         return true;
     }
@@ -126,7 +126,7 @@ public abstract class AdvancedCommand<T extends JavaPlugin> extends BukkitComman
      * @throws IllegalArgumentException when the return value is null
      */
     public List<String> onTabComplete(Sender sender, String alias, String[] arguments, Location location) {
-        return super.tabComplete(sender.toCommandSender(), alias, arguments, location);
+        return super.tabComplete(sender.toCommandSender(), alias, arguments);
     }
 
     /**
@@ -153,7 +153,6 @@ public abstract class AdvancedCommand<T extends JavaPlugin> extends BukkitComman
      * @throws IllegalArgumentException when the return value is null
      */
     @NotNull
-    @Override
     public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args, @Nullable Location location) throws IllegalArgumentException {
         return onTabComplete(Sender.build(sender), alias, args, location);
     }
