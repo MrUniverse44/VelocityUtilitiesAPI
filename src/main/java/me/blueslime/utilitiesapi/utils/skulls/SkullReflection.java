@@ -8,10 +8,9 @@ import org.bukkit.inventory.meta.SkullMeta;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Base64;
 import java.util.UUID;
 
-public class SkullReflection {
+public class SkullReflection implements SkullExecutable{
     private static final UUID RANDOM_UUID = UUID.fromString("92864445-51c5-4c3b-9039-517c9927d1b4");
 
     private static final Method SKULL_META_OWNER_PROFILE = getOwnerProfile();
@@ -36,7 +35,7 @@ public class SkullReflection {
         return PluginConsumer.ofUnchecked(
                 () -> SkullMeta.class.getDeclaredMethod("setOwnerProfile", getProfileClass()),
                 e -> {},
-                null
+                () -> null
         );
     }
 
@@ -44,7 +43,7 @@ public class SkullReflection {
         return PluginConsumer.ofUnchecked(
                 () -> Class.forName("org.bukkit.profile.PlayerProfile"),
                 e -> {},
-                null
+                () -> null
         );
     }
 
@@ -52,7 +51,7 @@ public class SkullReflection {
         return PluginConsumer.ofUnchecked(
                 () -> Class.forName("org.bukkit.profile.PlayerTextures"),
                 e -> {},
-                null
+                () -> null
         );
     }
 
@@ -60,7 +59,7 @@ public class SkullReflection {
         return PluginConsumer.ofUnchecked(
                 () -> Bukkit.class.getDeclaredMethod("createPlayerProfile", UUID.class),
                 e -> {},
-                null
+                () -> null
         );
     }
 
@@ -74,7 +73,7 @@ public class SkullReflection {
                     return textureClass.getDeclaredMethod("getTextures");
                 },
                 e -> {},
-                null
+                () -> null
         );
     }
 
@@ -88,7 +87,7 @@ public class SkullReflection {
                     return textureClass.getDeclaredMethod("setSkin", URL.class);
                 },
                 e -> {},
-                null
+                () -> null
         );
     }
 
@@ -103,11 +102,11 @@ public class SkullReflection {
                     return profileClass.getDeclaredMethod("setTextures", textureClass);
                 },
                 e -> {},
-                null
+                () -> null
         );
     }
 
-    private static Object getProfileBase64(String base64) {
+    private Object getProfileBase64(String base64) {
         return PluginConsumer.ofUnchecked(
                 () -> {
                     Object profile = BUKKIT_CREATE_PROFILE.invoke(null, RANDOM_UUID);
@@ -124,11 +123,11 @@ public class SkullReflection {
                     return profile;
                 },
                 e -> {},
-                null
+                () -> null
         );
     }
 
-    public static boolean attemptNewBase64(ItemStack head, String base64) {
+    public boolean attemptNewBase64(ItemStack head, String base64) {
         if (checkInitialization()) {
             return PluginConsumer.ofUnchecked(
                     () -> {
@@ -149,16 +148,6 @@ public class SkullReflection {
             );
         }
         return false;
-    }
-
-    public static URL getUrlFromBase64(String base64) throws MalformedURLException {
-        if (base64.contains("textures.minecraft.net")) {
-            return new URL(base64);
-        }
-        String decoded = new String(Base64.getDecoder().decode(base64));
-        // We simply remove the "beginning" and "ending" part of the JSON, so we're left with only the URL. You could use a proper
-        // JSON parser for this, but that's not worth it. The String will always start exactly with this stuff anyway
-        return new URL(decoded.substring("{\"textures\":{\"SKIN\":{\"url\":\"".length(), decoded.length() - "\"}}}".length()));
     }
 }
 

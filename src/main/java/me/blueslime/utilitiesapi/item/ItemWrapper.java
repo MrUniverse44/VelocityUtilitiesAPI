@@ -11,6 +11,7 @@ import me.blueslime.utilitiesapi.item.dynamic.executor.FunctionExecutor;
 import me.blueslime.utilitiesapi.item.nbt.ItemNBT;
 import me.blueslime.utilitiesapi.text.TextUtilities;
 import me.blueslime.utilitiesapi.tools.PluginTools;
+import me.blueslime.utilitiesapi.utils.skulls.SkullExecutable;
 import me.blueslime.utilitiesapi.utils.skulls.SkullReflection;
 import org.bukkit.Bukkit;
 import org.bukkit.FireworkEffect;
@@ -31,6 +32,8 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "deprecation"})
 public class ItemWrapper implements Cloneable {
+    public static SkullExecutable SKULL_EXECUTABLE_SYSTEM = new SkullReflection();
+
     private static boolean SKULL_NEW_SKIN_SYSTEM = true;
     private static boolean ENCHANTMENT_WARNING = false;
     private DynamicExecutor executor = new DefaultExecutor();
@@ -100,6 +103,10 @@ public class ItemWrapper implements Cloneable {
         );
 
         item.setItemMeta(meta);
+    }
+
+    public static void setSkullExecutable(SkullExecutable executable) {
+        SKULL_EXECUTABLE_SYSTEM = executable;
     }
 
     public void setEnchantments(List<String> enchantments) {
@@ -302,7 +309,7 @@ public class ItemWrapper implements Cloneable {
 
         if (meta != null && (value != null && !value.isEmpty())) {
             if (SKULL_NEW_SKIN_SYSTEM) {
-                if (SkullReflection.attemptNewBase64(
+                if (SKULL_EXECUTABLE_SYSTEM.attemptNewBase64(
                     itemStack, value
                 )) {
                     return itemStack;
