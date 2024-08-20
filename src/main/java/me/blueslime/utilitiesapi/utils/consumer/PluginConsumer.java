@@ -1,6 +1,7 @@
 package me.blueslime.utilitiesapi.utils.consumer;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public interface PluginConsumer<T> {
 
@@ -14,7 +15,22 @@ public interface PluginConsumer<T> {
         T accept();
     }
 
-    static  void process(PluginOutConsumer consumer) {
+    interface ReturnablePluginConsumer<V, K> {
+        V accept(K arg);
+    }
+
+    /**
+     * ReturnablePluginConsumer works similar to {@link Predicate}
+     * @param consumer to execute
+     * @return V the created consumer
+     * @param <V> value to return
+     * @param <K> entry parameter to get the value
+     */
+    static <V, K> ReturnablePluginConsumer<V, K> ofReturnable(ReturnablePluginConsumer<V, K> consumer) {
+        return consumer;
+    }
+
+    static void process(PluginOutConsumer consumer) {
         try {
             consumer.executeConsumer();
         } catch (Exception ex) {
@@ -30,7 +46,7 @@ public interface PluginConsumer<T> {
         }
     }
 
-    static  void process(PluginOutConsumer consumer, Consumer<Exception> exception) {
+    static void process(PluginOutConsumer consumer, Consumer<Exception> exception) {
         try {
             consumer.executeConsumer();
         } catch (Exception ex) {
@@ -49,13 +65,12 @@ public interface PluginConsumer<T> {
     }
 
     static <T> T ofUnchecked(final PluginConsumer<T> template, final Consumer<Exception> exception, PluginExecutableConsumer<T> defValue) {
-        T results = defValue.accept();
         try {
-            results = template.executeConsumer();
+            return template.executeConsumer();
         } catch (Exception ex) {
             exception.accept(ex);
         }
-        return results;
+        return defValue.accept();
     }
 
     static <T> T ofUnchecked(final PluginConsumer<T> template, final Consumer<Exception> exception) {
@@ -69,13 +84,12 @@ public interface PluginConsumer<T> {
     }
 
     static <T> T ofUnchecked(final PluginConsumer<T> template, PluginExecutableConsumer<T> defValue) {
-        T results = defValue.accept();
         try {
-            results = template.executeConsumer();
+            return template.executeConsumer();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        return results;
+        return defValue.accept();
     }
 
     static <T> T ofUnchecked(String message, final PluginConsumer<T> template) {

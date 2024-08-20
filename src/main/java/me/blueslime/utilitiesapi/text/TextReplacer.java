@@ -30,6 +30,26 @@ public class TextReplacer {
     }
 
     /**
+     * Add more replacements to this replacer
+     * @param replacements to get replacements
+     * @return this instance
+     */
+    public TextReplacer addReplacements(Map<String, String> replacements) {
+        this.replacements.putAll(replacements);
+        return this;
+    }
+
+    /**
+     * Add more replacements from another replacement
+     * @param replacer to copy replacements
+     * @return this instance
+     */
+    public TextReplacer addReplacements(TextReplacer replacer) {
+        this.replacements.putAll(replacer.replacements);
+        return this;
+    }
+
+    /**
      * Replace a key with a value
      * @param key to be replaced
      * @param value of the replacement
@@ -96,6 +116,14 @@ public class TextReplacer {
             );
         }
         return text;
+    }
+
+    /**
+     * Apply all replacements for a String List
+     */
+    public List<String> applyAll(List<String> textList) {
+        textList.replaceAll(this::apply);
+        return textList;
     }
 
     /**

@@ -6,11 +6,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SkullReflection implements SkullExecutable{
+    private final Map<String, Object> playerProfileStorage = new ConcurrentHashMap<>();
+
     private static final UUID RANDOM_UUID = UUID.fromString("92864445-51c5-4c3b-9039-517c9927d1b4");
 
     private static final Method SKULL_META_OWNER_PROFILE = getOwnerProfile();
@@ -22,13 +25,27 @@ public class SkullReflection implements SkullExecutable{
     private static final Method PROFILE_SET_TEXTURE = setTextures();
 
     private static boolean checkInitialization() {
+        check(SKULL_META_OWNER_PROFILE, BUKKIT_CREATE_PROFILE, TEXTURE_GET_TEXTURES, TEXTURE_SET_SKIN, PROFILE_SET_TEXTURE);
         return SKULL_META_OWNER_PROFILE != null &&
-                PROFILE_CLASS != null &&
-                TEXTURE_CLASS != null &&
-                BUKKIT_CREATE_PROFILE != null &&
-                TEXTURE_GET_TEXTURES != null &&
-                TEXTURE_SET_SKIN != null &&
-                PROFILE_SET_TEXTURE != null;
+            PROFILE_CLASS != null &&
+            TEXTURE_CLASS != null &&
+            BUKKIT_CREATE_PROFILE != null &&
+            TEXTURE_GET_TEXTURES != null &&
+            TEXTURE_SET_SKIN != null &&
+            PROFILE_SET_TEXTURE != null;
+    }
+
+    private static void check(Method... methods) {
+        PluginConsumer.process(
+            () -> {
+                for (Method method : methods) {
+                    if (method != null) {
+                        method.setAccessible(true);
+                    }
+                }
+            },
+            e -> {}
+        );
     }
 
     private static Method getOwnerProfile() {
@@ -57,7 +74,7 @@ public class SkullReflection implements SkullExecutable{
 
     private static Method getCreateProfileMethod() {
         return PluginConsumer.ofUnchecked(
-                () -> Bukkit.class.getDeclaredMethod("createPlayerProfile", UUID.class),
+                () -> Bukkit.class.getDeclaredMethod("createPlayerProfile", UUID.class, String.class),
                 e -> {},
                 () -> null
         );
@@ -109,17 +126,21 @@ public class SkullReflection implements SkullExecutable{
     private Object getProfileBase64(String base64) {
         return PluginConsumer.ofUnchecked(
                 () -> {
-                    Object profile = BUKKIT_CREATE_PROFILE.invoke(null, RANDOM_UUID);
+                    if (playerProfileStorage.containsKey(base64)) {
+                        return playerProfileStorage.get(base64);
+                    }
+                    Object profile = BUKKIT_CREATE_PROFILE.invoke(null, RANDOM_UUID, "RandomBoy");
                     Object textures = TEXTURE_GET_TEXTURES.invoke(profile);
-                    URL urlObject;
-                    try {
-                        urlObject = getUrlFromBase64(base64);
-                    } catch (MalformedURLException e) {
-                        e.printStackTrace();
+
+                    URL urlObject = PluginConsumer.ofUnchecked(() -> getUrlFromBase64(base64), e -> {}, () -> null);
+
+                    if (urlObject == null) {
                         return null;
                     }
+
                     TEXTURE_SET_SKIN.invoke(textures, urlObject);
                     PROFILE_SET_TEXTURE.invoke(profile, textures);
+                    playerProfileStorage.put(base64, profile);
                     return profile;
                 },
                 e -> {},
