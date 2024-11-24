@@ -48,6 +48,10 @@ public abstract class AdvancedCommand<T extends JavaPlugin> extends BukkitComman
         this(plugin,null);
     }
 
+    public boolean overwriteCommand() {
+        return false;
+    }
+
     public void register() {
         if (this.command != null) {
             CommandLoader.build(plugin)

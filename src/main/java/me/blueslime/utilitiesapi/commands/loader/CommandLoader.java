@@ -55,7 +55,9 @@ public class CommandLoader {
                     getCommandMap.setAccessible(true);
                     return (CommandMap)getCommandMap.invoke(plugin.getServer());
                 },
-                e -> {},
+                e -> {
+                    plugin.getLogger().severe("Failed to get command map in this minecraft version.");
+                },
                 () -> null
             );
         }
@@ -77,7 +79,10 @@ public class CommandLoader {
 
         if (
             oldCommand instanceof PluginIdentifiableCommand &&
-            ((PluginIdentifiableCommand) oldCommand).getPlugin() == executable.getPlugin()
+            (
+                (executable.overwriteCommand())
+                || (!executable.overwriteCommand() && ((PluginIdentifiableCommand) oldCommand).getPlugin() == executable.getPlugin())
+            )
         ) {
             bukkitCommands.remove(name);
             oldCommand.unregister(commandMap);
@@ -88,6 +93,9 @@ public class CommandLoader {
         commandMap.register(executable.getCommand(), fallbackName, executable);
 
         for (String alias : executable.getAliases()) {
+            if (commandMap.getCommand(alias) != null) {
+                bukkitCommands.remove(alias);
+            }
             commandMap.register(alias, fallbackName, executable);
         }
     }
