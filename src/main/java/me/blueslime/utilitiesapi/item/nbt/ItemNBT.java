@@ -205,22 +205,23 @@ public class ItemNBT {
 
     private boolean isUpperOrEqualThan(double version) {
         return convertClassVersionToNumber(this.version) >= version ||
-               convertVersionToNumber(originVersion) >= version;
+                convertVersionToNumber(originVersion) >= version;
     }
 
     private double convertVersionToNumber(String version) {
         try {
-            // Not need to replace v and _ but only to prevent future changes xD
-            String[] parts = version.replace("v", "").replace("_", "").split("\\.");
-            if (parts.length >= 2) {
-                return Double.parseDouble(parts[0] + "." + parts[1]);
-            } else {
-                return Double.parseDouble(1 + "." + parts[0]);
-            }
+            version = version.replace("v", "").split("_")[0];
+            String[] parts = version.split("\\.");
+
+            int major = Integer.parseInt(parts[0]);
+            int minor = (parts.length > 1) ? Integer.parseInt(parts[1]) : 0;
+
+            return major + (minor / 10.0);
         } catch (NumberFormatException e) {
             return 0;
         }
     }
+
 
     private double convertClassVersionToNumber(String version) {
         try {
