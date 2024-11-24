@@ -203,7 +203,12 @@ public class ItemNBT {
         return this.version.equals(version);
     }
 
-    private boolean isUpperOrEqualThan(double version) {
+    /**
+     * Compare Minecraft Versions with the current minecraft server.
+     * @param version to compare, Minecraft versions of 1.10< will appear like this: 1.0(number)
+     * @return compare result.
+     */
+    public boolean isUpperOrEqualThan(double version) {
         return convertClassVersionToNumber(this.version) >= version ||
                 convertVersionToNumber(originVersion) >= version;
     }
@@ -216,17 +221,20 @@ public class ItemNBT {
             int major = Integer.parseInt(parts[0]);
             int minor = (parts.length > 1) ? Integer.parseInt(parts[1]) : 0;
 
-            return major + (minor / 10.0);
+            return major + (minor < 10 ? minor / 100.0 : minor / 10.0);
         } catch (NumberFormatException e) {
             return 0;
         }
     }
 
-
     private double convertClassVersionToNumber(String version) {
         try {
             String[] parts = version.replace("v", "").split("_");
-            return Double.parseDouble(parts[0] + "." + parts[1]);
+
+            int major = Integer.parseInt(parts[0]);
+            int minor = Integer.parseInt(parts[1]);
+
+            return major + (minor < 10 ? minor / 100.0 : minor / 10.0);
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             return 0;
         }
