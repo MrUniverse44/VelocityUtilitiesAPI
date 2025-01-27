@@ -17,6 +17,7 @@ import java.util.List;
 
 @SuppressWarnings({"unused"})
 public abstract class AdvancedCommand<T extends JavaPlugin> extends BukkitCommand {
+    private final List<String> aliases;
     protected final T plugin;
     private String command;
 
@@ -41,6 +42,7 @@ public abstract class AdvancedCommand<T extends JavaPlugin> extends BukkitComman
     public AdvancedCommand(T plugin, String command, String description, String usageMessage, List<String> aliases) {
         super(command, description, usageMessage, aliases);
         this.command = command;
+        this.aliases = aliases;
         this.plugin = plugin;
     }
 
@@ -85,6 +87,12 @@ public abstract class AdvancedCommand<T extends JavaPlugin> extends BukkitComman
     public @NotNull AdvancedCommand<T> setUsage(@NotNull String message) {
         super.setUsage(message);
         return this;
+    }
+
+    @NotNull
+    @Override
+    public List<String> getAliases() {
+        return aliases;
     }
 
     /**

@@ -61,6 +61,28 @@ public class TextReplacer {
     }
 
     /**
+     * Replace a key with a value
+     * @param key to be replaced
+     * @param value of the replacement
+     * @return TextReplacer
+     */
+    public TextReplacer replace(String key, double value) {
+        replacements.put(key, String.valueOf(value));
+        return this;
+    }
+
+    /**
+     * Replace a key with a value
+     * @param key to be replaced
+     * @param value of the replacement
+     * @return TextReplacer
+     */
+    public TextReplacer replace(String key, float value) {
+        replacements.put(key, String.valueOf(value));
+        return this;
+    }
+
+    /**
      * Replace a key value from a configuration path
      * @param key to be replaced
      * @param configuration to search the path
@@ -110,10 +132,9 @@ public class TextReplacer {
      */
     public String apply(String text) {
         for (Map.Entry<String, String> entry : replacements.entrySet()) {
-            text = text.replace(
-                    entry.getKey(),
-                    entry.getValue()
-            );
+            String variable = entry.getKey();
+            String regex = "(?i)" + variable.replace("<", "<\\u00A7?.*?");
+            text = text.replaceAll(regex + "\\s?", entry.getValue());
         }
         return text;
     }

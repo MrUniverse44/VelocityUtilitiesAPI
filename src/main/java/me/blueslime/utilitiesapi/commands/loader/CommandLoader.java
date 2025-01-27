@@ -93,11 +93,41 @@ public class CommandLoader {
         commandMap.register(executable.getCommand(), fallbackName, executable);
 
         for (String alias : executable.getAliases()) {
-            if (commandMap.getCommand(alias) != null) {
-                bukkitCommands.remove(alias);
-            }
-            commandMap.register(alias, fallbackName, executable);
+            PluginConsumer.ofUnchecked(
+                () -> {
+                    if (commandMap.getCommand(alias) != null) {
+                        bukkitCommands.remove(alias);
+                    }
+                    commandMap.register(alias, fallbackName, executable);
+                    return true;
+                },
+                e -> executable.getPlugin().getLogger().warning("Failed to register command alias \"" + alias + "\". trying again with other method." + e.getMessage()),
+                () -> {
+                    registerCommand(executable, alias);
+                    executable.getPlugin().getLogger().info("Registered command \"" + alias + "\".");
+                    return true;
+                }
+            );
         }
+    }
+
+    private void registerCommand(AdvancedCommand<?> executable, String alias) {
+        final org.bukkit.command.Command oldCommand = commandMap.getCommand(alias);
+
+        if (
+            oldCommand instanceof PluginIdentifiableCommand &&
+            (
+                (executable.overwriteCommand())
+                || (!executable.overwriteCommand() && ((PluginIdentifiableCommand) oldCommand).getPlugin() == executable.getPlugin())
+            )
+        ) {
+            bukkitCommands.remove(alias);
+            oldCommand.unregister(commandMap);
+        }
+
+        String fallbackName = executable.getPlugin().getName().toLowerCase(Locale.ENGLISH);
+
+        commandMap.register(alias, fallbackName, executable);
     }
 
     public CommandLoader register(AdvancedCommand<?> command) {

@@ -114,6 +114,3 @@ public interface PluginConsumer<T> {
 
     static <T> PluginConsumer<T> of(PluginConsumer<T> c){ return c; }
 }
-
-
-
