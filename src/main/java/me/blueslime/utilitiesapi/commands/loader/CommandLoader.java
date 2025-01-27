@@ -13,22 +13,13 @@ import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class CommandLoader {
-
-    private static CommandLoader LOADER_INSTANCE = null;
-
-    public static CommandLoader build(JavaPlugin plugin) {
-        if (LOADER_INSTANCE == null) {
-            LOADER_INSTANCE = new CommandLoader(plugin);
-        }
-        return LOADER_INSTANCE;
-    }
+public class CommandLoader extends Commands {
 
     private final Map<String, Command> bukkitCommands;
     private final CommandMap commandMap;
 
     @SuppressWarnings("unchecked")
-    private CommandLoader(JavaPlugin plugin) {
+    public CommandLoader(JavaPlugin plugin) {
         Field bukkitCommandMapField = PluginConsumer.ofUnchecked(
             () -> plugin.getServer().getClass().getDeclaredField("commandMap"),
             e -> {},
@@ -55,9 +46,7 @@ public class CommandLoader {
                     getCommandMap.setAccessible(true);
                     return (CommandMap)getCommandMap.invoke(plugin.getServer());
                 },
-                e -> {
-                    plugin.getLogger().severe("Failed to get command map in this minecraft version.");
-                },
+                e -> plugin.getLogger().severe("Failed to get command map in this minecraft version."),
                 () -> null
             );
         }
@@ -74,7 +63,8 @@ public class CommandLoader {
         );
     }
 
-    private void registerCommand(final String name, AdvancedCommand<?> executable) {
+    @Override
+    public void registerCommand(final String name, AdvancedCommand<?> executable) {
         final org.bukkit.command.Command oldCommand = commandMap.getCommand(name);
 
         if (
@@ -119,7 +109,8 @@ public class CommandLoader {
         }
     }
 
-    private void registerCommand(AdvancedCommand<?> executable, String alias) {
+    @Override
+    public void registerCommand(AdvancedCommand<?> executable, String alias) {
         PluginConsumer.process(
             () -> {
                 final org.bukkit.command.Command oldCommand = commandMap.getCommand(alias);
@@ -143,6 +134,7 @@ public class CommandLoader {
         );
     }
 
+    @Override
     public CommandLoader register(AdvancedCommand<?> command) {
         return register(
             command.getCommand(),
@@ -150,6 +142,7 @@ public class CommandLoader {
         );
     }
 
+    @Override
     public CommandLoader register(String commandName, AdvancedCommand<?> commandClass) {
         if (commandMap != null) {
             registerCommand(commandName, commandClass);
@@ -157,10 +150,12 @@ public class CommandLoader {
         return this;
     }
 
+    @Override
     public CommandLoader unregister(AdvancedCommand<?> command) {
         return unregister(command.getCommand());
     }
 
+    @Override
     public CommandLoader unregister(String commandName) {
         if (commandMap == null) {
             return this;
@@ -176,10 +171,6 @@ public class CommandLoader {
             commandMap
         );
         return this;
-    }
-
-    public void finish() {
-
     }
 
 }

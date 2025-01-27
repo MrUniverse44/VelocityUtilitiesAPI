@@ -1,7 +1,7 @@
 package me.blueslime.utilitiesapi.commands;
 
 import me.blueslime.utilitiesapi.color.ColorHandler;
-import me.blueslime.utilitiesapi.commands.loader.CommandLoader;
+import me.blueslime.utilitiesapi.commands.loader.Commands;
 import me.blueslime.utilitiesapi.commands.sender.Sender;
 import org.bukkit.Location;
 import org.bukkit.command.*;
@@ -56,14 +56,14 @@ public abstract class AdvancedCommand<T extends JavaPlugin> extends BukkitComman
 
     public void register() {
         if (this.command != null) {
-            CommandLoader.build(plugin)
+            Commands.build(plugin)
                 .register(this)
                 .finish();
         }
     }
     
     public void unregister() {
-        CommandLoader.build(plugin)
+        Commands.build(plugin)
             .unregister(this)
             .finish();
     }
