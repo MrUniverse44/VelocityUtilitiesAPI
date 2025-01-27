@@ -120,22 +120,27 @@ public class CommandLoader {
     }
 
     private void registerCommand(AdvancedCommand<?> executable, String alias) {
-        final org.bukkit.command.Command oldCommand = commandMap.getCommand(alias);
+        PluginConsumer.process(
+            () -> {
+                final org.bukkit.command.Command oldCommand = commandMap.getCommand(alias);
 
-        if (
-            oldCommand instanceof PluginIdentifiableCommand &&
-            (
-                (executable.overwriteCommand())
-                || (!executable.overwriteCommand() && ((PluginIdentifiableCommand) oldCommand).getPlugin() == executable.getPlugin())
-            )
-        ) {
-            bukkitCommands.remove(alias);
-            oldCommand.unregister(commandMap);
-        }
+                if (
+                    oldCommand instanceof PluginIdentifiableCommand &&
+                    (
+                        (executable.overwriteCommand())
+                        || (!executable.overwriteCommand() && ((PluginIdentifiableCommand) oldCommand).getPlugin() == executable.getPlugin())
+                    )
+                ) {
+                    bukkitCommands.remove(alias);
+                    oldCommand.unregister(commandMap);
+                }
 
-        String fallbackName = executable.getPlugin().getName().toLowerCase(Locale.ENGLISH);
+                String fallbackName = executable.getPlugin().getName().toLowerCase(Locale.ENGLISH);
 
-        commandMap.register(alias, fallbackName, executable);
+                commandMap.register(alias, fallbackName, executable);
+            },
+            e -> {}
+        );
     }
 
     public CommandLoader register(AdvancedCommand<?> command) {
