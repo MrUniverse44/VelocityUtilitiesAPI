@@ -92,7 +92,15 @@ public class CommandLoader {
 
         commandMap.register(executable.getCommand(), fallbackName, executable);
 
+        if (executable.getAliases() == null || executable.getAliases().isEmpty()) {
+            return;
+        }
+
         for (String alias : executable.getAliases()) {
+            if (alias == null) {
+                continue;
+            }
+
             PluginConsumer.ofUnchecked(
                 () -> {
                     if (commandMap.getCommand(alias) != null) {
