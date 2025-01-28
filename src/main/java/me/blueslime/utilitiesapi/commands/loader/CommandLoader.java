@@ -99,7 +99,7 @@ public class CommandLoader extends Commands {
                     commandMap.register(alias, fallbackName, executable);
                     return true;
                 },
-                e -> executable.getPlugin().getLogger().warning("Failed to register command alias \"" + alias + "\". trying again with other method." + e.getMessage()),
+                e -> {},
                 () -> {
                     registerCommand(executable, alias);
                     executable.getPlugin().getLogger().info("Registered command \"" + alias + "\".");
