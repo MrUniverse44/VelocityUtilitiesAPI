@@ -14,7 +14,7 @@ public abstract class Commands {
         return LOADER_INSTANCE;
     }
 
-    public static void replaceCommandLoader(CommandLoader loader) {
+    public static void replaceCommandLoader(Commands loader) {
         LOADER_INSTANCE = loader;
     }
 
@@ -22,15 +22,15 @@ public abstract class Commands {
 
     public abstract void registerCommand(AdvancedCommand<?> executable, String alias);
 
-    public abstract CommandLoader register(AdvancedCommand<?> command);
+    public abstract Commands register(AdvancedCommand<?> command);
 
-    public abstract CommandLoader register(String commandName, AdvancedCommand<?> commandClass);
+    public abstract Commands register(String commandName, AdvancedCommand<?> commandClass);
 
-    public CommandLoader unregister(AdvancedCommand<?> command) {
+    public Commands unregister(AdvancedCommand<?> command) {
         return unregister(command.getCommand());
     }
 
-    public abstract CommandLoader unregister(String commandName);
+    public abstract Commands unregister(String commandName);
 
     public void finish() {
 
