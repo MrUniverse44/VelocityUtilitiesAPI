@@ -11,9 +11,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @SuppressWarnings({"unused"})
 public abstract class AdvancedCommand<T extends JavaPlugin> extends BukkitCommand {
@@ -22,11 +21,11 @@ public abstract class AdvancedCommand<T extends JavaPlugin> extends BukkitComman
     private String command;
 
     public AdvancedCommand(T plugin, String command) {
-        this(plugin, command, "Plugin Command", "/" + command + " <args>", Collections.emptyList());
+        this(plugin, command, "Plugin Command", "/" + command + " <args>", new CopyOnWriteArrayList<>());
     }
 
     public AdvancedCommand(T plugin, String command, List<String> aliases) {
-        this(plugin, command, "Plugin Command", "/" + command + " <args>", aliases);
+        this(plugin, command, "Plugin Command", "/" + command + " <args>", new CopyOnWriteArrayList<>(aliases));
     }
 
     public AdvancedCommand(T plugin, FileConfiguration configuration, String commandPath, String aliasesPath) {
@@ -35,14 +34,14 @@ public abstract class AdvancedCommand<T extends JavaPlugin> extends BukkitComman
             configuration != null ? configuration.getString(commandPath, "") : "",
             "Plugin Command",
             "/<command> <args>",
-            configuration != null ? configuration.getStringList(aliasesPath) : new ArrayList<>()
+            configuration != null ? new CopyOnWriteArrayList<>(configuration.getStringList(aliasesPath)) : new CopyOnWriteArrayList<>()
         );
     }
 
     public AdvancedCommand(T plugin, String command, String description, String usageMessage, List<String> aliases) {
         super(command, description, usageMessage, aliases);
         this.command = command;
-        this.aliases = aliases;
+        this.aliases = new CopyOnWriteArrayList<>(aliases);
         this.plugin = plugin;
     }
 
