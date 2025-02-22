@@ -3,7 +3,7 @@
 
 ---
 
-[![](https://jitpack.io/v/BlueSlimeDev/VelocityUtilitiesAPI.svg)](https://jitpack.io/#BlueSlimeDev/VelocityUtilitiesAPI)
+[![](https://jitpack.io/v/MrUniverse44/VelocityUtilitiesAPI.svg)](https://jitpack.io/#MrUniverse44/VelocityUtilitiesAPI)
 
 Maven Usage (With jitpack):
 ```XML
